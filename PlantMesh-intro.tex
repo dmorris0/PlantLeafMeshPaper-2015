@@ -1,8 +1,24 @@
 \section{Introduction}
 \label{sec:intro}
 
-%Introduction here including application description
+This paper addresses the problem of automatically building $3$D mesh models of plant leafs using inexpensive time-of-flight RGB-D sensors.  Plant researchers, seeking to understand genetic underpinnings of plant growth [REF] and seeking to develop new varieties [REF], need automated ways to non-invasively measure plant phenotypes including growth, leaf distributions, orientations, photosynthesis and productivity [REF].  An important step in estimating all of these properties is obtaining $3$D shape and pose for all the plant leafs.  Plants cannot be moved or disturbed in growth chambers, and so our concept is to mount close-range RGB-D sensors in the chambers and acquire 3D mesh models of the leafs.
 
-3D modeling of plant leaf canopy is a challenging computer vision problem [REF]. Solving this problem enables biological researchers to non-invasively phenotype plant growth and productivity [REF], which is critical to identify genes that can increase crop performance [REF].
-%
-To this end, we develop a new plant leaf mesh construction algorithm using data from RGB-D sensors. Specifically, ... 
+Time-of-flight RGB-D sensors have both advantages and drawbacks compared to other 3D sensors.  [Expand the below]
+\begin{itemize}
+\item Dense depth image without scanning or rotating the target
+\item Depth even on non-textured regions
+\item Closely-aligned high resolution color image
+\item Near IR reflectance image
+\item Significantly higher depth error than laser scanners
+\item Short range and sensitive to specular artifacts
+\item Occlusion boundary artifacts (as with most ranging devices)
+\end{itemize}
+
+Here we address a key obstacle in obtaining accurate leaf models: the large noise in the depth images. [Expand the below:]
+\begin{itemize}
+\item There has been research in merging depth maps from multiple views and in reducing noise this way.  This is not so helpful here as the sensor is fixed, and the size of the noise compared to the features we want to observe is large in our application.
+\item 
+\end {itemize}
+
+Our solution is a new mesh generation algorithm that leverages the high resolution color image, the dense depth estimates and the near-IR reflection image to overcome large depth errors.  The paper is organized as follows. [Explain]
+
