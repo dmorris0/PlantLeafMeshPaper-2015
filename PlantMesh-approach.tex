@@ -2,47 +2,7 @@
 \label{sec:data}
 
 
-We used a Creative Senz3D RGB-D sensor~\cite{nguyen2015vietnamese}. The sensor contains both a $1280 \times 720$ color camera adjacent to a depth camera with a resolution of $320\times240$ pixels.  A flash IR emitter illuminates the scene and the adjacent IR sensor measures the time-of-travel for the reflected light at a dense $320 \times 240$ pixel grid, producing a dense depth map.  This sensor operates in a similar way to the Kinect 2 but is designed for closer range targets.  
-
-\begin{figure}
-\begin{center}
-\fbox{\rule{0pt}{2in} \rule{.9\linewidth}{0pt}}
-%Need an image of the sensor
-   %\includegraphics[trim=200 250 200 270,clip,width=0.9\linewidth]{Figures/sampleLeaf}
-\end{center}
-   \caption{Time-of-flight RGB-D sensor consists of a flash IR emitter, an IR sensor that measures time-of-travel for the reflected light on a dense pixel grid, and a color camera.  In this paper the Creative Senz3D sensor was used.}
-\label{fig:sensor}
-\end{figure}
-
-While the sensor produces dense depth measurements over target leaf surfaces, the difficulty in converting these measurements into 3D models is that the noise in the measurements is significantly larger than the features we are seeking to recover.  In this section we model and quantify the measurement noise.
-
-\subsection{Noise Characterization}
-\label{sec:noise}
-
-The depth camera returns an IR reflectance in addition to a depth value at each pixel.  Hence it can be calibrated in the same way as the color camera using Zhang's method~\cite{Zhang2000}.  The result is that each pixel defines a ray from the camera.  Depth noise is modeled as a one dimensional random variable, $\varepsilon$, for each pixel along its ray direction.
-
-The depth noise, $\varepsilon$, is modeled as the sum of an image-varying term, $\varepsilon_I$, and a scene-varying term, $\varepsilon_S$:
-\begin{equation}
-\varepsilon = \varepsilon_I + \varepsilon_S. \label{eq:epsilon}
-\end{equation}
-The term $\varepsilon_I$ models the random change in depth for camera pixels of subsequent images of a static scene from a static camera.  To quantify this term we measured the standard deviation $\sigma_I$ in depth of each pixel for a batch of 300 images of a fixed scene containing a flat matte surface.  We repeated this at different poses and depths, and with different surface albedos.  While target depth, inclination, albedo, and pixel position are all correlated with $\sigma_I$, we found that the best predictor for $\sigma_I$ was the IR reflectance intensity, as shown in Figure~\ref{fig:sigmainterframe}.  For typical scenes the single measurement noise in depth is roughly 5mm, although for low reflectivity objects or objects at long range this noise can increase significantly.  Fortunately plant leafs are good IR reflectors.
-
-\begin{figure}
-\begin{center}
-   \includegraphics[trim=120 280 110 290,clip,width=0.9\linewidth]{Figures/SigmaInterframe}
-\end{center}
-   \caption{Image-varying noise is predicted well by the IR reflectance in raw units returned by the camera.}
-\label{fig:sigmainterframe}
-\end{figure}
-
-Averaging depth measurements of a fixed scene will reduce the noise from $\varepsilon_I$, but will not reduce the noise from $\varepsilon_S$.  This latter scene-varying term is constant for a static scene, but changes when the scene changes.  To characterize this noise we first eliminated (approximately) the image-varying noise contribution by averaging over a large number of images (300).  Then assuming $\varepsilon_S$ is independent and identically distributed between pixels, we measured the variance of the pixel depth errors between a known flat surface and the estimated surface.  In our experiments we obtained $\sigma_S=6.5mm$, and found that it was insensitive to changes in depth.
-
-The total pixel noise can be estimated assuming independence of $\varepsilon_I$ and $\varepsilon_S$, and is given by:
-\begin{equation}
-\sigma^2 = \frac{\sigma_I^2}{N} + \sigma_S^2,\label{eq:sigma}
-\end{equation}
-where $N$ is the number of images averaged over.  When averaging 5 or more depth images the scene-varying contribution, $\sigma_S^2$, will dominate.  There are additional sources of noise not modeled by this.  These include object specularities, and mixed-depth pixels on object edges.  These tend to produce very large image-varying noise, $\sigma_I$, and we discard these points.  
-
+We explore using a new class of RGB-D sensor such as the Creative Senz3D~\cite{nguyen2015vietnamese} to build 3D mesh models of plant leafs. The sensor contains a high resolution color camera ($1280 \times 720$ pixels) adjacent and parallel to a lower resolution depth camera ($320\times240$ pixels).  A flash IR emitter adjacent to these cameras illuminates the scene and depth sensor measures the time-of-travel for the reflected light as well as its reflectance over its pixel grid.  These modalities are illustrated in Figure~\ref{fig:plantnoise}.  It operates in a similar way to the Kinect 2 but is designed for closer range targets.  
 
 \begin{figure}
 \begin{center}
@@ -55,8 +15,49 @@ where $N$ is the number of images averaged over.  When averaging 5 or more depth
 ($c$) & ($d$) \\
 \end{tabular}
 \end{center}
-   \caption{Illustration of sensor data.  ($a$) Portion of color image. ($b$) IR reflectance image. ($c$) Portion of a single depth image surrounding plant projected into $3$D showing significant depth noise. ($d$) Average of 60 depth images projected into $3$D, with $\sigma_S$ being the dominant source of noise.  Units of $3$D plots are mm.}
+\caption{Illustration of sensor data.  ($a$) Portion of color image. ($b$) IR reflectance image with reflectance values. ($c$) Portion of a single depth image surrounding plant projected into $3$D showing significant depth noise. ($d$) Average of 60 depth images projected into $3$D, with $\sigma_S$ being the dominant source of noise.  Units of $3$D plots are mm.  The goal of this paper is to combine these data elements into }
 \label{fig:plantnoise}
 \end{figure}
+
+While the sensor produces dense depth measurements over target leaf surfaces, the noise in depth measurements is significantly larger than the features we are seeking to recover as illustrated in Figure~\ref{fig:plantnoise}($c$).  A key goal in this paper is to overcome this noise to maximize the accuracy of leaf shape estimates.  We start in this section by modeling and quantifying the measurement noise.
+
+%\begin{figure}
+%\begin{center}
+%\fbox{\rule{0pt}{2in} \rule{.9\linewidth}{0pt}}
+%Need an image of the sensor
+%   %\includegraphics[trim=200 250 200 270,clip,width=0.9\linewidth]{Figures/sampleLeaf}
+%\end{center}
+%   \caption{Time-of-flight RGB-D sensor consists of a flash IR emitter, an IR sensor that measures time-of-travel for the reflected light on a %dense pixel grid, and a color camera.  In this paper the Creative Senz3D sensor was used.}
+%\label{fig:sensor}
+%\end{figure}
+
+
+\subsection{Noise Characterization}
+\label{sec:noise}
+
+Since the depth camera returns an IR reflectance in addition to a depth value at each pixel, both it and the color camera are initially calibrated using Zhang's method~\cite{Zhang2000} to obtain intrinsic and extrinsic parameters.  Thus each pixel in each camera defines a ray from its camera origin.  Depth noise is modeled as a one dimensional random variable, $\varepsilon$, along the ray for each pixel along its ray direction.
+
+The depth noise, $\varepsilon$, is modeled as the sum of an image-varying term, $\varepsilon_I$, and a scene-varying term, $\varepsilon_S$:
+\begin{equation}
+\varepsilon = \varepsilon_I + \varepsilon_S. \label{eq:epsilon}
+\end{equation}
+The term $\varepsilon_I$ models the random change in depth for camera pixels of subsequent images of a static scene from a static camera.  To quantify this term we measured the standard deviation $\sigma_I$ in depth of each pixel for a batch of 300 images of a fixed scene containing a flat matte surface.  We repeated this at different poses and depths, and with different surface albedos.  While target depth, inclination, albedo, and pixel position are all correlated with $\sigma_I$, we found that the best predictor for $\sigma_I$ was the IR reflectance intensity, as shown in Figure~\ref{fig:sigmainterframe}.  For typical scenes the single measurement noise in depth is roughly 5mm, although for low reflectivity objects or objects at long range this noise can increase significantly.  Fortunately plant leafs are good IR reflectors.
+
+\begin{figure}
+\begin{center}
+   \includegraphics[trim=120 280 110 290,clip,width=0.9\linewidth]{Figures/SigmaInterframe}
+\end{center}
+   \caption{Image-varying noise is predicted well by the IR reflectance in raw units returned by the camera, see Figure~\ref{fig:plantnoise}($b$).}
+\label{fig:sigmainterframe}
+\end{figure}
+
+Averaging depth measurements of a fixed scene will reduce the noise from $\varepsilon_I$, but will not reduce the noise from $\varepsilon_S$.  This latter scene-varying term is constant for a static scene, but changes when the scene changes.  To characterize this noise we first eliminated (approximately) the image-varying noise contribution by averaging over a large number of images (300).  Then assuming $\varepsilon_S$ is independent and identically distributed between pixels, we measured the variance of the pixel depth errors between a known flat surface and the estimated surface.  In our experiments we obtained $\sigma_S=6.5mm$, and found that it was insensitive to changes in depth.
+
+The total pixel noise can be estimated assuming independence of $\varepsilon_I$ and $\varepsilon_S$, and is given by:
+\begin{equation}
+\sigma^2 = \frac{\sigma_I^2}{N} + \sigma_S^2,\label{eq:sigma}
+\end{equation}
+where $N$ is the number of images averaged over.  When averaging 5 or more depth images the scene-varying contribution, $\sigma_S^2$, will dominate.  There are additional sources of noise not modeled by this.  These include object specularities, and mixed-depth pixels on object edges.  These tend to produce very large image-varying noise, $\sigma_I$, and we can filter these points by discarding depth pixels with $\sigma_I>20$mm.  
+
 
 
