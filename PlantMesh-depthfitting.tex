@@ -71,7 +71,7 @@ We build a simplified bidirectional reflectance model to explain the pixel value
 \beq
 R_i = \frac{I_i}{r_i^h}\ray_i\cdot\normal_i \rho s_i.\label{eq:reflectanceinit}
 \eeq
-Here $I_i$ is the intensity of the ray from the IR illuminator.  For a source emanating in all directions this would decrease with a factor of $\frac{1}{r_i^2}$, but a focused beam the decrease may be less, and we model the decay power with $h$.  Under a Lambertian assumption the reflected beam is given by $\ray_i\dot\normal_i \rho = \cos(\theta_i) \rho$ where $\theta_i$ is the angle between the ray to source $\ray_$ and the surface normal $\normal_i$, and $\rho$ is the albedo.  Finally the sensor scales the incoming beam with a factor $s_i$.  This model can be simplified further by merging some of the unknown parameters.  We define a pixel gain $g_i = \log(I_i \rho s_i)$, and the resulting model is:
+Here $I_i$ is the intensity of the ray from the IR illuminator.  For a source emanating in all directions this would decrease with a factor of $\frac{1}{r_i^2}$, but a focused beam the decrease may be less, and we model the decay power with $h$.  Under a Lambertian assumption the reflected beam is given by $\ray_i\dot\normal_i \rho = \cos(\theta_i) \rho$ where $\theta_i$ is the angle between the ray to source $\ray_i$ and the surface normal $\normal_i$, and $\rho$ is the albedo.  Finally the sensor scales the incoming beam with a factor $s_i$.  This model can be simplified further by merging some of the unknown parameters.  We define a pixel gain $g_i = \log(I_i \rho s_i)$, and the resulting model is:
 \beq
 R_i = \frac{ \exp(g_i) \cos(\theta_i)}{r_i^h}. \label{eq:reflectance}
 \eeq
