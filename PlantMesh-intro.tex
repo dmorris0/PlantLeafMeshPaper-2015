@@ -22,3 +22,18 @@ Here we address a key obstacle in obtaining accurate leaf models: the large nois
 
 Our solution is a new mesh generation algorithm that leverages the high resolution color image, the dense depth estimates and the near-IR reflection image to overcome large depth errors.  The paper is organized as follows. [Explain]
 
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{ c c }
+\includegraphics[trim=200 280 200 280,clip,width=0.4\linewidth]{Figures/plant1-rgb} &
+\includegraphics[trim=220 270 160 280,clip,width=0.4\linewidth]{Figures/plant1-ir} \\
+($a$) & ($b$) \\
+\includegraphics[trim=180 270 180 280,clip,width=0.4\linewidth]{Figures/plant1-3D-single} &
+\includegraphics[trim=180 270 180 280,clip,width=0.4\linewidth]{Figures/plant1-3D-average} \\
+($c$) & ($d$) \\
+\end{tabular}
+\end{center}
+\caption{Illustration of sensor data.  ($a$) Portion of color image. ($b$) IR reflectance image with reflectance values. ($c$) Portion of a single depth image surrounding plant projected into $3$D showing significant depth noise. ($d$) Average of 60 depth images projected into $3$D, with $\sigma_S$ being the dominant source of noise.  Units of $3$D plots are mm.  The goal of this paper is to combine these data elements into }
+\label{fig:plantnoise}
+\end{figure}

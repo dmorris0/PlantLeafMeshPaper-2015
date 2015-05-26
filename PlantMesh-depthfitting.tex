@@ -7,7 +7,7 @@ In this paper we define a mesh in a $2$D image space and project it into $3$D.  
 
 \subsection{Notation}
 
-A point, $\point$, is a vector in $3$D.  In a given camera coordinate system, it projects onto a pixel on the unit focal-length image-plane $\hpoint=(u,v,1)^\top$, where the `` $\hat{\text{  }}$ '' indicates a homogeneous vector, and $u$ and $v$ are the coordinates in this plane.  Now $\hpoint$ defines a ray from the camera origin, and the original point is obtained by scaling the image-plane point by its depth, $\lambda$, along the ray, namely: $\point = \lambda\hpoint$. 
+A vertex, $\vertex$, is a vector in $3$D.  In a given camera coordinate system, it projects onto a pixel on the unit focal-length image-plane $\hvertex=(u,v,1)^\top$, where the `` $\tilde{\text{ }}$ '' indicates a homogeneous vector, and $u$ and $v$ are the coordinates in this plane.  Now $\hvertex$ defines a ray from the camera origin, and the original vertex is obtained by scaling the image-plane vertex by its depth, $\lambda$, along the ray, namely: $\vertex = \lambda\hvertex$. 
 
 \subsection{Facet Model}
 
@@ -23,35 +23,63 @@ Mesh fitting for an individual facet is illustrated in Figure~\ref{fig:facet}.  
 
 The next step is to associate depth measurements with the facet.  Pixels in the depth camera are projected along their rays out into $3$D.  The resulting $3$D points that lie within the facet pyramid (defined by these rays through its vertices) will project into the $2$D facet in the color image.  Hence it is straightforward to associate $3$D points with mesh facets.  
 
-To estimate the facet parameters from depth measurements we will express the depth points as a linear function of the vertices of its facet.  We make a local orthographic approximation for the projection of a facet.  This will be a good approximation as long as the facet size is small compared to is depth from the camera, which is true for most applications.  Given this assumption, the coordinates of a point $\point$ lying on a facet can be expressed as a linear combination of the three vertex coordinates $\vertex_i$, $\vertex_j$ and $\vertex_k$ as follows:
+To estimate the facet parameters from depth measurements we will express the depth points as a linear function of the vertices of its facet.  We make a local orthographic approximation for the projection of a facet.  This will be a good approximation as long as the facet size is small compared to is depth from the camera, which is true for most applications.  Given this assumption, the coordinates of a point $\point$ lying on a facet can be expressed as a linear combination of the three vertex coordinates $\vertex_a$, $\vertex_b$ and $\vertex_c$ as follows:
 \beq  %see PlantMacros.tex
-\point = \alpha_i \vertex_i + \alpha_j \vertex_j + \alpha_k \vertex_k. \label{eq:point}
+\point = \alpha_a \vertex_a + \alpha_b \vertex_b + \alpha_c \vertex_c. \label{eq:point}
 \eeq
-The coefficients $\alpha_i$, $\alpha_j$ and $\alpha_k$ are defined in Figure~\ref{fig:triangle}.  This equation applies both to the image coordinates of the point and vertices, and the $3$D point and $3$D vertices. The coefficients can be computed from this equation in image coordinates as the point and vertices image coordinates are known.  In $3$D we can select the third component of this equation and write it:
+The coefficients $\alpha_a$, $\alpha_b$ and $\alpha_c$ are defined in Figure~\ref{fig:triangle}.  Substituting in depth-scaled homogeneous vectors, and taking the third row, we obtain an equation for the point depth, $\lambda_{p}$:
 \beq
-\lambda_{p} = \alpha_i \lambda_i + \alpha_j \lambda_j + \alpha_k \lambda_k, \label{eq:pointdepth}
+\lambda_{p} = \alpha_a \lambda_a + \alpha_b \lambda_b + \alpha_c \lambda_c, \label{eq:pointdepth}
 \eeq
-where $\lambda_i$ is the third component of $\vertex_i$ and so forth.  
+where $\lambda_a$ is the depth of $\vertex_a$ and so forth.  
 
 \begin{figure}
 \begin{center}
    \includegraphics[trim=150 140 140 80,clip,width=0.75\linewidth]{Figures/TriangleParameterization}
 \end{center}
-   \caption{The coordinates of a point on a facet described by Eq.~(\ref{eq:point}) are the weighted linear sum of the three vertex coordinates.  The weight $\alpha_i$ for vertex $\vertex_i$ is the ratio of its perpendicular distance $l_i$ to the opposite edge to the vertex perpendicular distance $h_i$.  Analogous expressions describe $\alpha_j$ and $\alpha_k$. }
+   \caption{The coordinates of a point on a facet described by Eq.~(\ref{eq:point}) are the weighted linear sum of the three vertex coordinates.  The weight, $\alpha_a$, for vertex $\vertex_a$ is given by $\alpha_a = \frac{l_a}{h_a}$, the ratio of its perpendicular distance $l_a$ to the opposite edge to the vertex perpendicular distance $h_a$.  Analogous expressions describe $\alpha_b$ and $\alpha_c$. }
 \label{fig:triangle}
 \end{figure}
 
-\subsection{Least Squares}
+\subsection{Least Squares Depth}
 
 Equation (\ref{eq:pointdepth}) gives the depth of one point in terms of its facet vertices.  For mesh with many facets and a measurement with many depth points, a vector of pixel depths, $\vlambda_d$, and vector of vertex depths, $\vlambda_v$, are related with a coefficient matrix, $A$, containing the appropriate $\alpha$'s:
 \beq
 \vlambda_d = A \vlambda_v. \label{eq:linearmesh}
 \eeq
-Given a measurement vector of point depths, $\tilde{\vlambda}_d$, expressed in the color camera coordinates, an error vector between these depths and the corresponding mesh points is: $\tilde{\vlambda}_d - A \vlambda_v$.  Notice that this error is along the color camera rays which are almost parallel to the depth camera rays, and thus to a good approximation the noise model in Eq.~(\ref{eq:sigma}) applies.  This leads to the following weighted squared error formulation:
+Given a measurement vector of point depths, $\bar{\vlambda}_d$, expressed in the color camera coordinates, the error vector between these depths and the corresponding mesh points is: $\bar{\vlambda}_d - A \vlambda_v$.  Notice that this error is along the color camera rays which to a good approximation are parallel to the depth camera rays, and thus the noise model in Eq.~(\ref{eq:sigma}) applies.  This justifies the following weighted squared error formulation:
 \beq
-E_{depth} = \| W \tilde{\vlambda}_d - W A \vlambda_v \|^2, \label{eq:meshleastsquares}
+E_{depth} = \| W \bar{\vlambda}_d - W A \vlambda_v \|^2, \label{eq:meshleastsquares}
 \eeq
 where $W$ is a diagonal matrix containing the inverse standard deviation, $\sigma^{-1}$, from Eq.~(\ref{eq:sigma}).
+
+\subsection{Shape from Shading}
+
+The depth camera measures IR reflectance in addition to depth at each pixel.  Since the reflectance depends on the angle between the surface normal and the incident ray from the IR illuminator, the reflectance image can provide useful cues on the object surface.  Shape from shading techniques model this dependence on the surface normal, along with additional surface assumptions such as smoothness, to estimate the normals and integrate an object surface [REF].  However the real world practicality of these methods has been limited since they generally require a single known light source position illuminating a Lambertian surface, the integration is sensitive to noise, and shape is obtained only up to a scale factor.  Fortunately our application satisfies the key requirements of Shape from Shading, (we have a known light source and leafs are modeled well as Lambertian surfaces~\cite{Chelle2006219}), and our mesh model provides additional information that removes the need to integrate noisy surface normals.  This section describes our use of Shape from Shading to improve shape recovery.
+
+\begin{figure}
+\begin{center}
+   \includegraphics[trim=100 100 100 40,clip,width=0.95\linewidth]{Figures/ShapeFromShading}
+\end{center}
+   \caption{Our geometric model for the reflectance image.  At each depth point the intensity of the reflectance image will depend on a number of factors including the angle between the facet normal and the ray to the illuminator shown for two points as $\theta_a$ and $\theta_b$. }
+\label{fig:shapefromshading}
+\end{figure}
+
+\subsubsection{Reflectance Modeling}
+
+We build a simplified bidirectional reflectance model to explain the pixel values, $R_i$, of the IR reflectance image, shown in Figure~\ref{fig:plantnoise}($b$).  This model for pixel $i$ is:
+\beq
+R_i = \frac{I_i}{r_i^h}\ray_i\cdot\normal_i \rho s_i.\label{eq:reflectanceinit}
+\eeq
+Here $I_i$ is the intensity of the ray from the IR illuminator.  For a source emanating in all directions this would decrease with a factor of $\frac{1}{r_i^2}$, but a focused beam the decrease may be less, and we model the decay power with $h$.  Under a Lambertian assumption the reflected beam is given by $\ray_i\dot\normal_i \rho = \cos(\theta_i) \rho$ where $\theta_i$ is the angle between the ray to source $\ray_$ and the surface normal $\normal_i$, and $\rho$ is the albedo.  Finally the sensor scales the incoming beam with a factor $s_i$.  This model can be simplified further by merging some of the unknown parameters.  We define a pixel gain $g_i = \log(I_i \rho s_i)$, and the resulting model is:
+\beq
+R_i = \frac{ \exp(g_i) \cos(\theta_i)}{r_i^h}. \label{eq:reflectance}
+\eeq
+
+The unknown parameters in Eq.~\ref{eq:reflectance} are $g_i$ and $h$, and they can be calibrated as follows.   Depth and reflectance images are taken of a flat, uniform albedo target at various depths and inclinations.  
+
+
+
 
 \subsection{Regularization}
 
@@ -68,7 +96,7 @@ E_{reg} = \| U \vlambda \|^2.
 
 \begin{figure}
 \begin{center}
-   \includegraphics[trim=100 110 140 90,clip,width=0.9\linewidth]{Figures/LaplacianFacets}
+   \includegraphics[trim=100 110 140 90,clip,width=0.8\linewidth]{Figures/LaplacianFacets}
 \end{center}
    \caption{In discrete form the Laplacing is implemented as an umbrella operator, Eq.~(\ref{eq:umbrella}), over a vertex $\vertex$ and its first neighbors.}
 \label{fig:laplacian}

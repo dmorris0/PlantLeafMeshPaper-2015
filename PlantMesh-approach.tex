@@ -4,21 +4,6 @@
 
 We explore using a new class of RGB-D sensor such as the Creative Senz3D~\cite{nguyen2015vietnamese} to build 3D mesh models of plant leafs. The sensor contains a high resolution color camera ($1280 \times 720$ pixels) adjacent and parallel to a lower resolution depth camera ($320\times240$ pixels).  A flash IR emitter adjacent to these cameras illuminates the scene and depth sensor measures the time-of-travel for the reflected light as well as its reflectance over its pixel grid.  These modalities are illustrated in Figure~\ref{fig:plantnoise}.  It operates in a similar way to the Kinect 2 but is designed for closer range targets.  
 
-\begin{figure}
-\begin{center}
-\begin{tabular}{ c c }
-\includegraphics[trim=200 280 200 280,clip,width=0.4\linewidth]{Figures/plant1-rgb} &
-\includegraphics[trim=220 270 160 280,clip,width=0.4\linewidth]{Figures/plant1-ir} \\
-($a$) & ($b$) \\
-\includegraphics[trim=180 270 180 280,clip,width=0.4\linewidth]{Figures/plant1-3D-single} &
-\includegraphics[trim=180 270 180 280,clip,width=0.4\linewidth]{Figures/plant1-3D-average} \\
-($c$) & ($d$) \\
-\end{tabular}
-\end{center}
-\caption{Illustration of sensor data.  ($a$) Portion of color image. ($b$) IR reflectance image with reflectance values. ($c$) Portion of a single depth image surrounding plant projected into $3$D showing significant depth noise. ($d$) Average of 60 depth images projected into $3$D, with $\sigma_S$ being the dominant source of noise.  Units of $3$D plots are mm.  The goal of this paper is to combine these data elements into }
-\label{fig:plantnoise}
-\end{figure}
-
 While the sensor produces dense depth measurements over target leaf surfaces, the noise in depth measurements is significantly larger than the features we are seeking to recover as illustrated in Figure~\ref{fig:plantnoise}($c$).  A key goal in this paper is to overcome this noise to maximize the accuracy of leaf shape estimates.  We start in this section by modeling and quantifying the measurement noise.
 
 %\begin{figure}
@@ -47,7 +32,7 @@ The term $\varepsilon_I$ models the random change in depth for camera pixels of 
 \begin{center}
    \includegraphics[trim=120 280 110 290,clip,width=0.9\linewidth]{Figures/SigmaInterframe}
 \end{center}
-   \caption{Image-varying noise is predicted well by the IR reflectance in raw units returned by the camera, see Figure~\ref{fig:plantnoise}($b$).}
+   \caption{Image-varying noise, $\sigma_I$, is predicted well by the IR reflectance in raw units returned by the camera, see Figure~\ref{fig:plantnoise}($b$).  The scene-varying noise, $\sigma_S$, is plotted for comparison.}
 \label{fig:sigmainterframe}
 \end{figure}
 
