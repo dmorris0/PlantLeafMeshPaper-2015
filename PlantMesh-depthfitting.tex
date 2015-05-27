@@ -11,7 +11,7 @@ A vertex, $\vertex$, is a vector in $3$D.  In a given camera coordinate system, 
 
 \subsection{Facet Model}
 
-Mesh fitting for an individual facet is illustrated in Figure~\ref{fig:facet}.  The $2$D vertices and edge connections are determined in an image, in this case the color image although it could be the depth image, as described in section~\ref{sec:mesh}.  If these vertices lie on a feature of the target leaf, such as its edge, we know that that those $3$D features like somewhere along the rays emanating from camera origin through those vertices.  Hence a triangular facet approximation to the object surface will have vertices on these three rays.  
+Mesh fitting for an individual facet is illustrated in Figure~\ref{fig:facet}.  The $2$D vertices and edge connections are determined in an image, in this case the color image although it could be the depth image, as described in section~\ref{sec:colormesh}.  If these vertices lie on a feature of the target leaf, such as its edge, we know that that those $3$D features like somewhere along the rays emanating from camera origin through those vertices.  Hence a triangular facet approximation to the object surface will have vertices on these three rays.  
 
 \begin{figure}
 \begin{center}
@@ -49,7 +49,7 @@ Equation (\ref{eq:pointdepth}) gives the depth of one point in terms of its face
 \eeq
 Given a measurement vector of point depths, $\bar{\vlambda}_d$, expressed in the color camera coordinates, the error vector between these depths and the corresponding mesh points is: $\bar{\vlambda}_d - A \vlambda_v$.  Notice that this error is along the color camera rays which to a good approximation are parallel to the depth camera rays, and thus the noise model in Eq.~(\ref{eq:sigma}) applies.  This justifies the following weighted squared error formulation:
 \beq
-E_{depth} = \| W \bar{\vlambda}_d - W A \vlambda_v \|^2, \label{eq:meshleastsquares}
+E_{depth}(\vlambda_v) = \| W \bar{\vlambda}_d - W A \vlambda_v \|^2, \label{eq:meshleastsquares}
 \eeq
 where $W$ is a diagonal matrix containing the inverse standard deviation, $\sigma^{-1}$, from Eq.~(\ref{eq:sigma}).
 
@@ -69,21 +69,46 @@ The depth camera measures IR reflectance in addition to depth at each pixel.  Si
 
 We build a simplified bidirectional reflectance model to explain the pixel values, $R_i$, of the IR reflectance image, shown in Figure~\ref{fig:plantnoise}($b$).  This model for pixel $i$ is:
 \beq
-R_i = \frac{I_i}{r_i^h}\ray_i\cdot\normal_i \rho s_i.\label{eq:reflectanceinit}
+R_i = \frac{I_i\rho \ray_i\cdot\normal_i s_i}{r_i^h}.\label{eq:reflectanceinit}
 \eeq
-Here $I_i$ is the intensity of the ray from the IR illuminator.  For a source emanating in all directions this would decrease with a factor of $\frac{1}{r_i^2}$, but a focused beam the decrease may be less, and we model the decay power with $h$.  Under a Lambertian assumption the reflected beam is given by $\ray_i\dot\normal_i \rho = \cos(\theta_i) \rho$ where $\theta_i$ is the angle between the ray to source $\ray_i$ and the surface normal $\normal_i$, and $\rho$ is the albedo.  Finally the sensor scales the incoming beam with a factor $s_i$.  This model can be simplified further by merging some of the unknown parameters.  We define a pixel gain $g_i = \log(I_i \rho s_i)$, and the resulting model is:
+Here $I_i$ is the intensity of the ray from the IR illuminator assumed to be a point source and decreasing with the inverse square of the distance to target, $r$. Under a Lambertian assumption the reflected beam is decreased by the albedo, $\rho$, and the inner product of the ray direction $\ray_i$ and the normal, $\normal_i$, which is equal to the cosine of the angle between them, $\theta_i$.  Finally the sensor scales the incoming beam with a factor $s_i$.  This model can be simplified further by approximating the outgoing ray $I_i$ as being the same for a given pixel regardless of target depth.  We define a pixel gain $g_i = \log(I_i s_i)$, and the resulting model is:
 \beq
-R_i = \frac{ \exp(g_i) \cos(\theta_i)}{r_i^h}. \label{eq:reflectance}
+R_i = \frac{ \exp(g_i) \rho \cos(\theta_i)}{r_i^2}. \label{eq:reflectance}
 \eeq
 
-The unknown parameters in Eq.~\ref{eq:reflectance} are $g_i$ and $h$, and they can be calibrated as follows.   Depth and reflectance images are taken of a flat, uniform albedo target at various depths and inclinations.  
+The gain values can be calculated from a single depth image of a known surface with constant albedo up to a scale factor (of the unknown albedo).  We observe large gain near the center of the image with tapering towards the edges, along with inter-pixel variations.  We chose to treat the pixel variations as noise and model the gain as a polynomial in normalized pixel coordinates, $u$ and $v$.  That is our modeled gain is:
+\beq
+g(u,v) = \beta_1 + \beta_2 u + \beta_3 v + \beta_4 u^2 + \beta_5 v^2 \label{eq:gainmodel}
+\eeq
+Taking the $\log$ of Eq.~\ref{eq:reflectance} we can do a least squares fit of the parameters $\beta_i$ and so characterize the gain.  We used a flat target with constant albedo and took data at various inclinations and depths. Figure ~\ref{fig:gain} shows the resulting gain model, along with data from one depth image.  We note that gain is primarily useful only up to a scale factor typically do not know the albedo of the target object.  
+
+\begin{figure}
+\begin{center}
+   \includegraphics[trim=100 250 100 250,clip,width=0.95\linewidth]{Figures/gain}
+\end{center}
+   \caption{Our model for gain $g(u,v)$ in Eq, (\ref{eq:gainmodel}) is fit to a $\log$ reflectance image adjusted with known range and ray angles from Eq.~(\ref{eq:reflectance}).  The dots are the measured data and the surface is the parameterized gain $g(u,v)$. }
+\label{fig:gain}
+\end{figure}
 
 
+\subsubsection{Mesh Normals Estimation}
 
+Given a reflectance image providing, $R_i$ for each pixel, a depth image from which we can calculate range to each pixel, $r_i$, and our gain model, $g(u,v)$, we can rearrange and Eq.~({eq:reflectance}) to obtain an inclination prediction, $\eta_i$ at each pixel:
+\beq
+\eta_i \equiv \rho_t\cos(\theta_i) = R_ir_i^2\exp(-g(u,v)). \label{eq:costheta}
+\eeq
+The scale factor is the unknown target albedo, $\rho_t$.  If the target such as a leaf has a uniform albedo, this is the same for all target pixels.  
+
+Now each mesh facet has a unit normal which can be encoded in terms of the depths of its three vertices: $\normal(\lambda_a,\lambda_b,\lambda_c)$.  The inner product of this normal with the unit ray to the illuminator is $\cos(\theta)$ and should agree with the values predicted in Eq. (\ref{eq:costheta}) for each reflectance pixel it contains.  This leads to a Shape from Shading cost of
+\beq
+E_{SfS}(\vlambda_v, \rho_t) = \sum_{i\in \mathcal{T}}\| \frac{\eta_i}{\rho_t} - \normal_i\cdot\ray_i \|^2.
+\label{eq:esfs}
+\eeq
+The sum is over all target pixels, $\mathcal{T}$, projecting into the image mesh, and $\normal_i$ indicates the normal of the facet into whose image the depth pixel projects.  This cost introduces the unknown target albedo, $\rho_t$, as an addition parameter to be optimized over.  The cost is nonlinear, but given a good initial parameters from the least squares solution to Eq.~(\ref{eq:meshleastsquares}), it is readily minimized as a function of vertex depths and albedo.
 
 \subsection{Regularization}
 
-Prior models on surface properties can be incorporated into the mesh via regularization and in so doing reduce the impact of noise.  Membrane energy is a well-used function in mesh optimization~\cite{Kobbelt:1998} and can be minimized using the discrete Laplacian operator.  Here we use Laplacian smoothing due to its simplicity and good performance~\cite{Kobbelt:1998,Ohtake2001789,Chen2005376}, although we modify it to accommodate image-based edge information.  In addition, rather than apply Laplacian smoothing after the fact, entailing an iterative optimization~\cite{Kobbelt:1998}, we show that Laplacian smoothing can be incorporated directly into the least squares mesh estimation.  This has a number of  advantages over application after the initial mesh estimation.  First the smoothing penalty is traded off against measurement error rather than vertex offset.  Second, the due to our ray constraints on the vertices we are able to derive a linear solution with not need to iterate.  Finally  when the regularization components are added to Eq.~(\ref{eq:meshleastsquares}) they ensure that the solution is well-posed even when some of the facets have no depth points in them.
+Prior models on surface properties can be incorporated into the mesh via regularization and in so doing reduce the impact of noise.  Membrane energy is a well-used function in mesh optimization~\cite{Kobbelt:1998} and can be minimized using the discrete Laplacian operator.  Here we use Laplacian smoothing due to its simplicity and good performance~\cite{Kobbelt:1998,Ohtake2001789,Chen2005376}, although we modify it to accommodate image-based edge information.  In addition, rather than apply Laplacian smoothing after the fact, entailing an iterative optimization~\cite{Kobbelt:1998}, we show that Laplacian smoothing can be incorporated directly into the least squares mesh estimation.  This has a number of  advantages.  First the smoothing penalty is traded off against measurement error rather than vertex offset.  Second, the due to our ray constraints on the vertices we are able to derive a linear least squares solution to the Laplacian avoiding the need to iterate as in methods such as~\cite{Kobbelt:1998}.  Finally  when the regularization components are added to Eq.~(\ref{eq:meshleastsquares}) they ensure that the solution is well-posed even when some of the facets have no depth points in them.
 
 Laplacian smoothing uses an umbrella-operator~\cite{Kobbelt:1998} on a vertex, $\vertex$, and its neighbors $\vertex_i\in\mathcal{N}(\vertex)$,
 \beq
@@ -91,7 +116,7 @@ Laplacian smoothing uses an umbrella-operator~\cite{Kobbelt:1998} on a vertex, $
 \eeq
 for $n$ neighbors as illustrated in Figure~\ref{fig:laplacian}.  In our model the vertices lie along known rays and so this operator can be expressed as a function of the vertex depth: $\vect{u}(\lambda) = \frac{1}{n}\sum_{i\in\mathcal{N}} \lambda_i \hvertex_i - \lambda\hvertex$.  The squared magnitude $\|\vect{u}(\lambda)\|^2$ is a natural penalty term as it captures a discrete form of the membrane energy.  Summing this over all vertices and arranging the known $\hvertex$ components into a single matrix $U$, we obtain
 \beq
-E_{reg} = \| U \vlambda \|^2.
+E_{reg}(\vlambda_v) = \| U \vlambda \|^2. \label{eq:reg}
 \eeq
 
 \begin{figure}
@@ -102,4 +127,7 @@ E_{reg} = \| U \vlambda \|^2.
 \label{fig:laplacian}
 \end{figure}
 
-
+The cost in Eq. (\ref{eq:reg}) penalizes high curvature regions, and so provides a way incorporate smoothness priors into the mesh estimation.  Now we may have image cues for creases or sharp edges on portions of a mesh, as we describe in section \ref{sec:colormesh}.  We can modify the umbrella operator from Eq. (\ref{eq:umbrella}) so that the neighbors are only other vertices on the crease.  In this way the Laplacian acts along the crease, and not across it, allowing sharper folding along these edges.
+ 
+ 
+ 
