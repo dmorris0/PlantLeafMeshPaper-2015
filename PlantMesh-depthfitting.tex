@@ -7,7 +7,7 @@ In this paper we define a mesh in a $2$D image space and project it into $3$D.  
 
 \subsection{Notation}
 
-A vertex, $\vertex$, is a vector in $3$D.  In a given camera coordinate system, it projects onto a pixel on the unit focal-length image-plane $\hvertex=(u,v,1)^\top$, where the `` $\tilde{\text{ }}$ '' indicates a homogeneous vector, and $u$ and $v$ are the coordinates in this plane.  Now $\hvertex$ defines a ray from the camera origin, and the original vertex is obtained by scaling the image-plane vertex by its depth, $\lambda$, along the ray, namely: $\vertex = \lambda\hvertex$. 
+A vertex, $\vertex_j$, is a vector in $3$D.  In a given camera coordinate system, it projects onto a pixel on the unit focal-length image-plane $\hvertex_j=(u,v,1)^\top$, where the `` $\tilde{\text{ }}$ '' indicates a homogeneous vector, and $u$ and $v$ are the coordinates in this plane.  Now $\hvertex_j$ defines a ray from the camera origin, and the original vertex is obtained by scaling the image-plane vertex by its depth, $\lambda_j$, along the ray, namely: $\vertex_j = \lambda_j\hvertex_j$. 
 
 \subsection{Facet Model}
 
@@ -21,17 +21,16 @@ Mesh fitting for an individual facet is illustrated in Figure~\ref{fig:facet}.  
 \label{fig:facet}
 \end{figure}
 
-The next step is to associate depth measurements with the facet.  Pixels in the depth camera are projected along their rays out into $3$D.  The resulting $3$D points that lie within the facet pyramid (defined by these rays through its vertices) will project into the $2$D facet in the color image.  Hence it is straightforward to associate $3$D points with mesh facets.  
+The next step is to associate depth measurements with the facet.  Pixels in the depth camera are projected along their rays out into $3$D, and then they are projected into the color image.  We associate the depth pixel, $\point_i$, with the facet, $\mathcal{F}_i$, into which it projects in the color image, as illustrated in Figure~\ref{fig:facet}. 
 
-To estimate the facet parameters from depth measurements we will express the depth points as a linear function of the vertices of its facet.  We make a local orthographic approximation for the projection of a facet.  This will be a good approximation as long as the facet size is small compared to is depth from the camera, which is true for most applications.  Given this assumption, the coordinates of a point $\point$ lying on a facet can be expressed as a linear combination of the three vertex coordinates $\vertex_a$, $\vertex_b$ and $\vertex_c$ as follows:
+To estimate the facet parameters from depth measurements we will express the depth points, $\point_i$, after they have been projected out and transformed into color camera coordinates, as a linear function of the vertices of its facet:
 \beq  %see PlantMacros.tex
-\point = \alpha_a \vertex_a + \alpha_b \vertex_b + \alpha_c \vertex_c. \label{eq:point}
+\point_i = \sum_{j\in\mathcal{F}_i} \alpha_j \vertex_j. \label{eq:point}
 \eeq
-The coefficients $\alpha_a$, $\alpha_b$ and $\alpha_c$ are defined in Figure~\ref{fig:triangle}.  Substituting in depth-scaled homogeneous vectors, and taking the third row, we obtain an equation for the point depth, $\lambda_{p}$:
+Here $\mathcal{F}$ is the set of three vertex indices belonging to the facet, and $\alpha_j$ is the coefficient of vertex $\vertex_j$ as illustrated in Figure~\ref{fig:triangle}, and $\sum_{j\in\mathcal{F}}\alpha_j=1$.  This linear sum is valid if we make a local orthographic approximation for the projection of a facet.  It will be a good approximation as long as the facet size is small compared to is depth from the camera, which is true for most applications.  Substituting in depth-scaled homogeneous vectors, and taking the third row, we obtain an equation for the point depth, $\lambda_i$, in the color image:
 \beq
-\lambda_{p} = \alpha_a \lambda_a + \alpha_b \lambda_b + \alpha_c \lambda_c, \label{eq:pointdepth}
+\lambda_i = \sum_{j\in\mathcal{F}_i} \alpha_j \lambda_j. \label{eq:pointdepth}
 \eeq
-where $\lambda_a$ is the depth of $\vertex_a$ and so forth.  
 
 \begin{figure}
 \begin{center}
@@ -43,15 +42,11 @@ where $\lambda_a$ is the depth of $\vertex_a$ and so forth.
 
 \subsection{Least Squares Depth}
 
-Equation (\ref{eq:pointdepth}) gives the depth of one point in terms of its facet vertices.  For mesh with many facets and a measurement with many depth points, a vector of pixel depths, $\vlambda_d$, and vector of vertex depths, $\vlambda_v$, are related with a coefficient matrix, $A$, containing the appropriate $\alpha$'s:
+Equation (\ref{eq:pointdepth}) gives the modeled depth of a point in terms of its facet vertices.  The depth camera will provide measured depths for each pixel, indicated as $\bar{\lambda}_i$, along with a standard deviation estimate $\sigma_i$ obtained from Eq.~(\ref{eq:sigma}).  Now this noise is along the depth ray, rather than the color camera ray, but since the depth and color cameras are close together compared to the distance to target, these rays are close to parallel and we assume $\sigma_i$ is a good measure along the camera ray.  With this approximation, the weighted least squares cost for between measured and predicted depth is:
 \beq
-\vlambda_d = A \vlambda_v. \label{eq:linearmesh}
+E_{depth}(\Lambda_{\vertex}) = \sum_{i\in\mathcal{D}} \|  \bar{\lambda}_i -  \sum_{j\in\mathcal{F}_i} \alpha_j \lambda_j \|^2_{\sigma_i^2}, \label{eq:meshleastsquares}
 \eeq
-Given a measurement vector of point depths, $\bar{\vlambda}_d$, expressed in the color camera coordinates, the error vector between these depths and the corresponding mesh points is: $\bar{\vlambda}_d - A \vlambda_v$.  Notice that this error is along the color camera rays which to a good approximation are parallel to the depth camera rays, and thus the noise model in Eq.~(\ref{eq:sigma}) applies.  This justifies the following weighted squared error formulation:
-\beq
-E_{depth}(\vlambda_v) = \| W \bar{\vlambda}_d - W A \vlambda_v \|^2, \label{eq:meshleastsquares}
-\eeq
-where $W$ is a diagonal matrix containing the inverse standard deviation, $\sigma^{-1}$, from Eq.~(\ref{eq:sigma}).
+where $\mathcal{D}$ is the set of depth pixels that project onto the target.  The norm is weighted with the inverse variance of each point.  Minimizing this for $\Lambda_{\vertex}$, the set of all vertex depths, is a straightforward linear calculation.  It estimates the mesh and it correctly minimizes the measurement error.
 
 \subsection{Shape from Shading}
 
@@ -69,18 +64,18 @@ The depth camera measures IR reflectance in addition to depth at each pixel.  Si
 
 We build a simplified bidirectional reflectance model to explain the pixel values, $R_i$, of the IR reflectance image, shown in Figure~\ref{fig:plantnoise}($b$).  This model for pixel $i$ is:
 \beq
-R_i = \frac{I_i\rho \ray_i\cdot\normal_i s_i}{r_i^h}.\label{eq:reflectanceinit}
+R_i = \frac{I_i\rho \ray_i\cdot\normal_i s_i}{r_i^2}.\label{eq:reflectanceinit}
 \eeq
-Here $I_i$ is the intensity of the ray from the IR illuminator assumed to be a point source and decreasing with the inverse square of the distance to target, $r$. Under a Lambertian assumption the reflected beam is decreased by the albedo, $\rho$, and the inner product of the ray direction $\ray_i$ and the normal, $\normal_i$, which is equal to the cosine of the angle between them, $\theta_i$.  Finally the sensor scales the incoming beam with a factor $s_i$.  This model can be simplified further by approximating the outgoing ray $I_i$ as being the same for a given pixel regardless of target depth.  We define a pixel gain $g_i = \log(I_i s_i)$, and the resulting model is:
+Here $I_i$ is the intensity of the ray from the IR illuminator assumed to be a point source and decreasing with the inverse square of the distance to target, $r$. Under a Lambertian assumption the reflected beam is decreased by the albedo, $\rho$, and the inner product of the ray direction $\ray_i$ and the normal, $\normal_i$.  Finally the sensor scales the incoming beam with a factor $s_i$.  This model can be simplified further by approximating the outgoing ray $I_i$ as being the same for a given pixel regardless of target depth.  We define a pixel gain $g_i = \log(I_i s_i)$, and the resulting model is:
 \beq
-R_i = \frac{ \exp(g_i) \rho \cos(\theta_i)}{r_i^2}. \label{eq:reflectance}
+R_i = \frac{ \rho \exp(g_i) \ray_i\cdot\normal_i }{r_i^2}. \label{eq:reflectance}
 \eeq
 
 The gain values can be calculated from a single depth image of a known surface with constant albedo up to a scale factor (of the unknown albedo).  We observe large gain near the center of the image with tapering towards the edges, along with inter-pixel variations.  We chose to treat the pixel variations as noise and model the gain as a polynomial in normalized pixel coordinates, $u$ and $v$.  That is our modeled gain is:
 \beq
 g(u,v) = \beta_1 + \beta_2 u + \beta_3 v + \beta_4 u^2 + \beta_5 v^2 \label{eq:gainmodel}
 \eeq
-Taking the $\log$ of Eq.~\ref{eq:reflectance} we can do a least squares fit of the parameters $\beta_i$ and so characterize the gain.  We used a flat target with constant albedo and took data at various inclinations and depths. Figure ~\ref{fig:gain} shows the resulting gain model, along with data from one depth image.  We note that gain is primarily useful only up to a scale factor typically do not know the albedo of the target object.  
+Taking the $\log$ of Eq.~(\ref{eq:reflectance}) we can do a least squares fit of the parameters $\beta_i$ and so characterize the gain.  We used a flat target with constant albedo and took data at various inclinations and depths. Figure~\ref{fig:gain} shows the resulting gain model, along with data from one depth image.   
 
 \begin{figure}
 \begin{center}
