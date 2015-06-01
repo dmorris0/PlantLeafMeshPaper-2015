@@ -26,10 +26,10 @@
 
 %-------------------------------------------------------------------------
 %%%%%%%%% TITLE
-\title{Plant Leaf Meshes from RGB-D Sensors}
+\title{Plant Leaf Meshes from Time-of-Flight RGB-D Sensors}
 
-\author{ 
-Daniel Morris \and Saif Imran \and Vincent Zickefoose \and Jin Chen \and David Kramer\\
+\author{
+Daniel Morris \and Saif Imran \and Vincent Zickefoose \and David Kramer \and Jin Chen\\
 %Need to fix the following:
 Department of Electrical and Computer Engineering\\
 Department of Energy Plant Research Laboratory\\
@@ -48,11 +48,13 @@ Michigan State University, East Lansing, MI 48824, USA
 
 \input{PlantMesh-related.tex}
 
+\input{PlantMacros.tex}
+
 \input{PlantMesh-approach.tex}
 
-\input{PlantMesh-rgbmesh.tex}
-
 \input{PlantMesh-depthfitting.tex}
+
+\input{PlantMesh-rgbmesh.tex}
 
 \input{PlantMesh-results.tex}
 
@@ -62,7 +64,7 @@ Michigan State University, East Lansing, MI 48824, USA
 
 {\small
 \bibliographystyle{ieee}
-\bibliography{sense3d}
+\bibliography{sense3d,mesh,rgbd,sfs,indoor_modeling}
 }
 %-------------------------------------------------------------------------
 
