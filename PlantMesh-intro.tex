@@ -12,12 +12,12 @@ While time-of-flight RGB-D sensors are small, inexpensive and provide dense 3D s
 \includegraphics[trim=200 280 200 280,clip,width=0.4\linewidth]{Figures/plant1-rgb} &
 \includegraphics[trim=220 270 160 280,clip,width=0.4\linewidth]{Figures/plant1-ir} \\
 ($a$) & ($b$) \\
-\includegraphics[trim=180 270 180 280,clip,width=0.4\linewidth]{Figures/plant1-3D-single} &
-\includegraphics[trim=180 270 180 280,clip,width=0.4\linewidth]{Figures/plant1-3D-average} \\
+\includegraphics[trim=180 270 180 280,clip,width=0.4\linewidth]{Figures/plant1-noise} &
+\includegraphics[trim=180 270 180 280,clip,width=0.4\linewidth]{Figures/plant1-mesh} \\
 ($c$) & ($d$) \\
 \end{tabular}
 \end{center}
-\caption{Illustration of sensor data.  ($a$) Portion of color image. ($b$) IR reflectance image with reflectance values. ($c$) Portion of a single depth image surrounding plant projected into $3$D showing significant depth noise. ($d$) Average of 60 depth images projected into $3$D, with $\sigma_S$ being the dominant source of noise.  Units of $3$D plots are mm.  The goal of this paper is to combine these data elements into }
+\caption{Illustration of sensor data.  ($a$) Portion of color image. ($b$) IR reflectance image with reflectance values. ($c$) Portion of a single depth image surrounding plant averaged over 60 frames to reduce noise, and projected into $3$D showing significant remaining depth noise. ($d$)  The mesh resulting from the algorithm in this paper using data from the color, depth and IR reflectance images.  Units of $3$D plots are mm.  }
 \label{fig:plantnoise}
 \end{figure}
 
