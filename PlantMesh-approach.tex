@@ -1,20 +1,33 @@
-\section{Sensor Data Characterization}
+\section{Sensor Overview}
+\label{sec:overview}
+
+We explore using a new class of RGB-D sensor such as the Creative Senz3D~\cite{nguyen2015vietnamese} to build 3D mesh models of plant leafs. The sensor contains a high resolution color camera ($1280 \times 720$ pixels) adjacent and parallel to a lower resolution depth camera ($320\times240$ pixels).  A flash IR emitter adjacent to these cameras illuminates the scene and depth sensor measures the time-of-travel for the reflected light as well as its reflectance over its pixel grid.  These modalities are illustrated in Figure~\ref{fig:plantnoise}.  Our approach is to leverage of the strengths of each sensor to compensate for weaknesses in the other.  
+
+\subsection{Sensor Issues}
+
+In our application the sensor remains fixed in the growth chamber and so there is not the opportunity to combine measurements from different viewpoints.  Rather, we seek to maximize the information from the different modalities of the sensors.  First leaf outlines can often be more precisely determined in the color camera for three reasons: the color camera has an order of magnitude more pixels than the depth camera, edge pixels in the depth camera are often very noisy due to double reflections, and color is often a useful cue in segmenting leaves.  Thus as in~\cite{Dellen2011} and unlike~\cite{Alenya2011,Alenya2013} low-level segmentation is performed in the full color image.  The color image also provides useful edge cues along leaf creases.
+
+The depth plus reflectance camera can provide leaf pixel cues, albeit at a lower resolution, as well as leaf geometry. Combining these leaf pixel cues with color segments enables automatic selection of the leaf segments.  Then the color boundaries and features can be used to constrain a mesh-based surface fitting of the leaves.
+
+Since we are interested in close-range objects, the baseline separating the color from the depth camera must be accounted for when determining pixel correspondences.  At depth discontinuities, this baseline can result in pixels from two different surfaces, both visible in the depth camera, being projected onto the same pixel region in the color camera.  
+
+
+Outline:
+\begin{enumerate}
+\item Depth + IR initial leaf detection
+\item Augmented color segmentation
+\item Color boundary and edges
+\item Mesh fitting and filtering
+\end{enumerate}
+
+
+
+
 \label{sec:data}
 
 
-We explore using a new class of RGB-D sensor such as the Creative Senz3D~\cite{nguyen2015vietnamese} to build 3D mesh models of plant leafs. The sensor contains a high resolution color camera ($1280 \times 720$ pixels) adjacent and parallel to a lower resolution depth camera ($320\times240$ pixels).  A flash IR emitter adjacent to these cameras illuminates the scene and depth sensor measures the time-of-travel for the reflected light as well as its reflectance over its pixel grid.  These modalities are illustrated in Figure~\ref{fig:plantnoise}.  It operates in a similar way to the Kinect 2 but is designed for closer range targets.  
-
 While the sensor produces dense depth measurements over target leaf surfaces, the noise in depth measurements is significantly larger than the features we are seeking to recover as illustrated in Figure~\ref{fig:plantnoise}($c$).  A key goal in this paper is to overcome this noise to maximize the accuracy of leaf shape estimates.  We start in this section by modeling and quantifying the measurement noise.
 
-%\begin{figure}
-%\begin{center}
-%\fbox{\rule{0pt}{2in} \rule{.9\linewidth}{0pt}}
-%Need an image of the sensor
-%   %\includegraphics[trim=200 250 200 270,clip,width=0.9\linewidth]{Figures/sampleLeaf}
-%\end{center}
-%   \caption{Time-of-flight RGB-D sensor consists of a flash IR emitter, an IR sensor that measures time-of-travel for the reflected light on a %dense pixel grid, and a color camera.  In this paper the Creative Senz3D sensor was used.}
-%\label{fig:sensor}
-%\end{figure}
 
 
 \subsection{Noise Characterization}
