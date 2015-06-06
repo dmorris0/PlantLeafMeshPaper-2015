@@ -1,29 +1,43 @@
-\section{Results}
-\label{sec:results}
-
 
 \begin{figure}
 \begin{center}
 \begin{tabular}{cc}
-\includegraphics[trim=190 280 190 290,clip,width=0.48\linewidth]{Figures/beanColor} &
-\includegraphics[trim=190 280 190 290,clip,width=0.48\linewidth]{Figures/beanDepth} \\
+\includegraphics[trim=190 280 190 290,clip,width=0.48\linewidth]{Figures/sphereColor} &
+\includegraphics[trim=190 280 190 290,clip,width=0.48\linewidth]{Figures/sphere3DMesh} \\
 ($a$) & ($b$) \\
-%Put bead SLIC and boundary here:
+\includegraphics[trim=190 280 190 290,clip,width=0.48\linewidth]{Figures/sphere3DMeshWithGT} &
+\includegraphics[trim=190 280 190 290,clip,width=0.48\linewidth]{Figures/sphere3DIsosurface} \\
 ($c$) & ($d$) \\
-\includegraphics[trim=190 280 190 290,clip,width=0.48\linewidth]{Figures/beanColorMesh} &
-\includegraphics[trim=190 280 190 290,clip,width=0.48\linewidth]{Figures/beanPointsOnLeaves} \\
-($e$) & ($f$) \\
-\includegraphics[trim=190 280 190 290,clip,width=0.48\linewidth]{Figures/bean3DMeshPlusPoints} &
-\includegraphics[trim=190 280 190 290,clip,width=0.48\linewidth]{Figures/bean3DMesh} \\
-($g$) & ($h$) \\
-\includegraphics[trim=190 280 190 290,clip,width=0.48\linewidth]{Figures/bean3DIsosurface} & \\
-($i$) & ($h$) \\
 \end{tabular}
 \end{center}
-   \caption{The algorithm steps are illustrated.  ($a$) Color image portion on plant.  ($b$) Depth image, where red pixels are those that are masked out using the method in Fig.~\ref{fig:occlusion} as they are not visible in the color image. ($c$) ($d$), ($e$) An mesh is defined in the color image within the leaf boundaries. ($f$) Points that project into the image-mesh, excluding occluded points from ($b$), are shown in yellow over the color image, and the remaining visible points are plotted in magenta.  ($g$) The mesh fit along the vertex rays is shown.  The $3$D points are red for those on the mesh and blue for the remaining.  ($h$) A more detailed view of the mesh. ($i$) A comparison with an isosurface created using marching cubes~\cite{} }
-\label{fig:sigmainterframe}
+   \caption{($a$) Color image of a 50mm diameter sphere.  ($b$) Estimated $3$D mesh. ($c$) Known sphere shape with center fit to data points shows how well the mesh captures the real surface.  ($d$) The isosurface is much more jagged and does not fit as well.  }
+\label{fig:sphere}
 \end{figure}
 
+
+\begin{figure}
+\begin{center}
+\includegraphics[trim=120 220 120 220,clip,width=0.8\linewidth]{Figures/plantMeshGT-01}
+\includegraphics[trim=120 220 120 220,clip,width=0.8\linewidth]{Figures/plantMeshGT-02}
+\end{center}
+   \caption{ The $3$D reconstruction from Fig.~\ref{fig:plantnoise} is aligned and compared to a laser scan of the plant image.  }
+\label{fig:plantnoiseGT}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[trim=190 270 190 290,clip,width=0.7\linewidth]{Figures/bean3DMeshPlusPoints} \\
+($a$) \\
+\includegraphics[trim=190 280 190 290,clip,width=0.7\linewidth]{Figures/bean3DMesh} \\
+($b$) \\
+\includegraphics[trim=190 280 190 290,clip,width=0.7\linewidth]{Figures/bean3DIsosurface} \\
+($c$) \\
+\end{tabular}
+\end{center}
+   \caption{ Result of fitting the mesh to the bean data from Fig.~\ref{fig:beanimageprocess}.  ($g$)  The $3$D points are red for those on the mesh and blue for the remaining.  ($h$) A more detailed view of the mesh. ($i$) A comparison with an isosurface created using marching cubes~\cite{} }
+\label{fig:beanfit}
+\end{figure}
 
 \begin{figure}
 \begin{center}
@@ -37,8 +51,15 @@
 \end{tabular}
 \end{center}
    \caption{($a$) Color image of a soybean plant.  ($b$) Mesh on the color image. ($c$) $3$D mesh along with camera poses. ($d$) Close-up of $3$D mesh.  }
-\label{fig:sigmainterframe}
+\label{fig:soybean}
 \end{figure}
 
 
+\section{Results}
+\label{sec:results}
 
+Mesh reconstructions on a number of plants are presented.  In all 3D plots the units are millimeters.  Figure~\ref{fig:plantnoise} shows image and $3$D data, along with the estimated mesh of a potted plant.  Detailed shapes are recovered. The estimated mesh is compared to a laser scan of the same plant in Fig.~\ref{fig:plantnoiseGT}.  This shows overall good accuracy of the shape, with the main error being an extension of the leaf tip area.  It appears the lower leaf shifted in position between the laser scan and the camera image, and this may be a result of the turntable required by the laser. 
+
+Another way to quantitatively evaluate the surface is to estimate a known $3$D object.  In Fig.~\ref{fig:sphere} a 50mm diameter sphere is imaged and the aligned to the points on the surface.  The $3$D point offsets from the sphere changes with the slope indicating that there are some inherent depth biases in the sensor.  Nevertheless the mesh smoothes the data noise and and approximates the sphere surface well.  The standard deviation of the raw points fit to the sphere is 2.3mm and the mesh vertices is 1.3mm.  This does not account for absolute depth error, only shape error, as the sphere center was aligned.
+
+Surface estimates for the bean plant from Fig.~\ref{fig:beanimageprocess} are shown in Fig.~\ref{fig:beanfit}.  The 3D points have been averaged over 30 frames to reduce noise, but still are noisy.  Despite this mesh is able capture the leaf features well.  A comparison is made to the Marching Cube algorithm from an isosurface~\cite{}.  The voxelization results is large artifacts.  Using smaller voxels leads to surface holes.  Shape estimation from a soybean plant is shown in Fig.~\ref{fig:soybean}, showing similar good performance.

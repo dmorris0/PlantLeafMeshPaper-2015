@@ -65,7 +65,22 @@ where $N$ is the number of images averaged over.  When averaging 5 or more depth
    \includegraphics[trim=130 90 140 90,clip,width=0.75\linewidth]{Figures/OcclusionModeling}
 \end{center}
    \caption{Occlusion modeling }
-\label{fig:triangle}
+\label{fig:occlusion}
 \end{figure}
 
+
+\begin{figure}
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[trim=190 280 190 290,clip,width=0.48\linewidth]{Figures/beanColor} &
+\includegraphics[trim=190 280 190 290,clip,width=0.48\linewidth]{Figures/beanDepth} \\
+($a$) & ($b$) \\
+\includegraphics[trim=80 170 80 140,clip,width=0.48\linewidth]{Figures/slic_cropped2} &
+\includegraphics[trim=190 280 190 290,clip,width=0.48\linewidth]{Figures/beanColorMesh} \\
+($c$) & ($d$) \\
+\end{tabular}
+\end{center}
+\caption{Initial algorithm steps.  ($a$) Color image portion on plant.  ($b$) Depth image, where red pixels are those that are masked out using the method in Fig.~\ref{fig:occlusion} as they are not visible in the color image. ($c$) SLIC superpixels on LAB color space.Each of the superpixels are colored with the mean L, a and b values of that particular superpixel. The leaf boundaries obtained by integrating the superpixels having the leaf pigments are shown in green dots. ($d$) An mesh is defined in the color image with evenly spaced vertices within and along the leaf boundaries. }
+\label{fig:beanimageprocess}
+\end{figure}
 
