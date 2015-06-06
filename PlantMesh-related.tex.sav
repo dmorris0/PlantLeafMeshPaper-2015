@@ -1,0 +1,9 @@
+\section{Related Work}
+\label{sec:related}
+
+
+Optimizing meshes for fit point cloud data has been approached through vertex additions and removals~\cite{hoppe:1994}, although this work assumes the point data are precise and dense.
+
+There are plenty of contour detection and segmentation in the literature that deals with leaf boundaries and detection, and come in both 2D and 3D leaf shape and boundary segmentation and detections. In 3D detection, Wei Ma et. al ~\cite{ma2008image} proposed extracting the apex points of the leaves from the volumetric data recovered from the images. According to the paper, volumetric data provides pose and position of 3D generic leaves, and 3d leaf shapes can be extracted based on the optimized voxels.
+
+

@@ -6,6 +6,7 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{subcaption}
 
 % Include other packages here, before hyperref.
 
@@ -39,9 +40,9 @@ Michigan State University, East Lansing, MI 48824, USA
 \maketitle
 
 %-------------------------------------------------------------------------
-\begin{abstract}
 
-\end{abstract}
+\input{PlantMesh-abstract.tex}
+
 %-------------------------------------------------------------------------
 
 \input{PlantMesh-intro.tex}
@@ -64,7 +65,7 @@ Michigan State University, East Lansing, MI 48824, USA
 
 {\small
 \bibliographystyle{ieee}
-\bibliography{sense3d,mesh,rgbd,sfs,indoor_modeling}
+\bibliography{sense3d,mesh,rgbd,sfs,indoor_modeling,meshcues,plants}
 }
 %-------------------------------------------------------------------------
 
