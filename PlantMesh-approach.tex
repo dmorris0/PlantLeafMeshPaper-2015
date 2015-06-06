@@ -57,5 +57,15 @@ The total pixel noise can be estimated assuming independence of $\varepsilon_I$ 
 \end{equation}
 where $N$ is the number of images averaged over.  When averaging 5 or more depth images the scene-varying contribution, $\sigma_S^2$, will dominate.  There are additional sources of noise not modeled by this.  These include object specularities, and mixed-depth pixels on object edges.  These tend to produce very large image-varying noise, $\sigma_I$, and we can filter these points by discarding depth pixels with $\sigma_I>20$mm.  
 
+\subsection{Occlusion Modeling}
+
+
+\begin{figure}
+\begin{center}
+   \includegraphics[trim=130 90 140 90,clip,width=0.75\linewidth]{Figures/OcclusionModeling}
+\end{center}
+   \caption{Occlusion modeling }
+\label{fig:triangle}
+\end{figure}
 
 
