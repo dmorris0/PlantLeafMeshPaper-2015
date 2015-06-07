@@ -1,9 +1,9 @@
 \section{Mesh Fitting}
 \label{sec:fitting}
 
-We pose mesh fitting to 3D point data as finding the most likely surface that would have generated those points.  By incorporating prior surface assumptions, the fitting process estimates a continuous surface from discrete points that can eliminate much of the measurement noise.  Methods that fit mesh models to 3D points often minimize the perpendicular distance of points to facets [REF].  This makes sense when point-cloud noise is equal in all directions or else the point noise is small compared to the facets.  For our data the measurement noise is large and is not equal in all directions, but rather is along the depth camera rays.  Hence the focus of this section is to develop a mesh fitting method that minimizes these pixel depth errors along the pixel rays.
+In mesh fitting we seek the most likely surface that generated the measured depth points.  This is achieved by minimizing a noise model and by incorporating prior surface assumptions through regularization.  Methods that fit mesh models to 3D points often minimize the perpendicular distance of points to facets~\cite{Sienz2000}.  This makes sense when point-cloud noise is equal in all directions or else the point noise is small compared to the facets.  For our data the measurement noise is large and is not equal in all directions, but rather is along the depth camera rays.  Our method to minimize this noise is described below.
 
-In this paper we define a mesh in a $2$D image space and project it into $3$D.  This is more limiting than full $3$D meshes as it models only the surface portions visible from the sensor, but it also provides a number of advantages.  Compared to methods that fit prior surface models to depth maps [ref], need to search of the space of poses, scales and distortions of the model with the chance of finding local minima.  Compared to voxel-based models with implicit surfaces [ref], our method can better incorporate pixels uncertainties and surface priors, as well as having fewer discretization artifacts.  In addition our method can naturally incorporate detailed features from the high-resolution color camera, and reflectivity information from the IR reflectance image.
+We initialize a planar mesh in the color image as described in section~\ref{sec:colormesh}, and then project it into $3$D.  This is more limiting than full $3$D meshes as it models only the surface portions visible from the sensor, but it also provides a number of advantages.  Compared to methods that fit prior surface models to depth maps~\cite{Turk1994,Hoppe1994,Sienz2000}, need to search of the space of poses, scales and distortions of the model with the chance of finding local minima.  Compared to voxel-based models with implicit surfaces~\cite{Curless:1996}, our method can better incorporate pixels uncertainties and surface priors, as well as having fewer discretization artifacts.  In addition our method can naturally incorporate detailed boundary features from the high-resolution color camera.
 
 \subsection{Notation}
 
@@ -11,7 +11,7 @@ A vertex, $\vertex_j$, is a vector in $3$D.  In a given camera coordinate system
 
 \subsection{Facet Model}
 
-Mesh fitting for an individual facet is illustrated in Figure~\ref{fig:facet}.  The $2$D vertices and edge connections are determined in an image, in this case the color image although it could be the depth image, as described in section~\ref{sec:colormesh}.  If these vertices lie on a feature of the target leaf, such as its edge, we know that that those $3$D features like somewhere along the rays emanating from camera origin through those vertices.  Hence a triangular facet approximation to the object surface will have vertices on these three rays.  
+Mesh fitting for an individual facet is illustrated in Figure~\ref{fig:facet}.  The initial $2$D vertices and edge connections are determined in the color image.  If these vertices lie on a feature of the target leaf, such as its edge, we know that that those $3$D features lie somewhere along the rays emanating from camera origin through those vertices.  Hence a triangular facet approximation to the object surface will have vertices on these three rays.  
 
 \begin{figure}
 \begin{center}
@@ -42,18 +42,18 @@ Here $\mathcal{F}$ is the set of three vertex indices belonging to the facet, an
 
 \subsection{Least Squares Depth}
 
-Equation (\ref{eq:pointdepth}) gives the modeled depth of a point in terms of its facet vertices.  The depth camera will provide measured depths for each pixel, indicated as $\bar{\lambda}_i$, along with a standard deviation estimate $\sigma_i$ obtained from Eq.~(\ref{eq:sigma}).  Now this noise is along the depth ray, rather than the color camera ray, but since the depth and color cameras are close together compared to the distance to target, these rays are close to parallel and we assume $\sigma_i$ is a good measure along the camera ray.  With this approximation, the weighted least squares cost for between measured and predicted depth is:
+Equation (\ref{eq:pointdepth}) gives the modeled depth of a point in terms of its facet vertices.  The depth camera will provide measured depths for each pixel, indicated as $\bar{\lambda}_i$, along with a standard deviation estimate $\sigma_i$ obtained from Eq.~(\ref{eq:sigma}).  Now this noise is along the depth ray, rather than the color camera ray, but since the depth and color cameras are close together compared to the distance to target, these rays are close to parallel and we assume $\sigma_i$ is a good measure along the camera ray.  With this approximation, the weighted least squares cost between measured and predicted depth is:
 \beq
-E_{depth}(\Lambda_{\vertex}) = \sum_{i\in\mathcal{D}} \|  \bar{\lambda}_i -  \sum_{j\in\mathcal{F}_i} \alpha_j \lambda_j \|^2_{\sigma_i^2}, \label{eq:meshleastsquares}
+E_{depth}(\vlambda_{\vertex}) = \sum_{i\in\mathcal{D}} \|  \bar{\lambda}_i -  \sum_{j\in\mathcal{F}_i} \alpha_j \lambda_j \|^2_{\sigma_i^2}, \label{eq:meshleastsquares}
 \eeq
-where $\mathcal{D}$ is the set of depth pixels that project onto the target.  The norm is weighted with the inverse variance of each point.  Minimizing this for $\Lambda_{\vertex}$, the set of all vertex depths, is a straightforward linear calculation.  It estimates the mesh and it correctly minimizes the measurement error.
+where $\mathcal{D}$ is the set of depth pixels that project onto the target.  The L2 norm is weighted with the inverse variance of each point.  Minimizing this for $\vlambda_{\vertex}$, the set of all vertex depths, is a straightforward linear calculation.  It estimates the mesh and it correctly minimizes the measurement error.
 
 
 \subsection{Regularization}
 
-Prior models on surface properties can be incorporated into the mesh via regularization and in so doing reduce the impact of noise.  In our application leaf surfaces are generally smoothly curved, and in some cases have creases such as along the spine.  Since our mesh facets are roughly equal in size, we can use the angle between adjacent facet normals, $\normal_i$ and $\normal_j$:
+Prior models on surface properties can be incorporated into the mesh via regularization and in so doing reduce the impact of noise.  In our application leaf surfaces are generally smoothly curved with few sharp edges.  We propose a regularization that approximates  Since our mesh facets are roughly equal in size, we can use the angle, $\theta$, between adjacent facet normals, $\normal_i$ and $\normal_j$:
 \beq
-E_{reg} = \sum_{adj(i,j)} \cos(\normal_i\cdot\normal_j)^-1. \label{eq:reg}
+E_{reg} = \sum_{adj(i,j)} \cos(\normal_i\cdot\normal_j)^{-1}. \label{eq:reg}
 \eeq
 Here the sum is over all pairs of normals whose facets share an edge and hence are adjacent.  Adding this nonlinear regularization term to the opimization can significantly improve surface estimation with strong noise.
 
@@ -62,9 +62,9 @@ It is also useful to have a linear regularization function.  The reason is that 
 \begin{figure}
 \begin{center}
 \begin{tabular}{c}
-   \includegraphics[trim=140 110 140 70,clip,width=0.75\linewidth]{Figures/adjacentFacets} \\
+   \includegraphics[trim=140 110 130 70,clip,width=0.6\linewidth]{Figures/adjacentFacets} \\
    ($a$) \\
-   \includegraphics[trim=140 110 140 60,clip,width=0.75\linewidth]{Figures/adjacentApprox} \\
+   \includegraphics[trim=140 110 140 60,clip,width=0.7\linewidth]{Figures/adjacentApprox} \\
    ($b$) \\
 \end{tabular}
 \end{center}
