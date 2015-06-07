@@ -1,10 +1,6 @@
 \section{Introduction}
 \label{sec:intro}
 
-%
-
-%In order to identify energy-related gene functions, plant researchers seek to understand genetic underpinnings of plant growth [REF] and seeking to develop new varieties [REF], 
-
 In order to meet the increasing needs for food and materials, researchers aim to produce sustainable plants with high yield and high resource-use efficiency by testing approaches ranging from molecular biology to field management~\cite{walter2015plant1}. In this process high-throughput plant phenotyping is the major bottleneck~\cite{cobb2013next}. New automated methods to non-invasively measure plant phenotypes including growth, plant structure, leaf layout and orientations, photosynthesis and productivity, are highly expected~\cite{leister1999large,muller2015leaf,walter2015plant1}. 
 
 
@@ -24,10 +20,11 @@ In order to meet the increasing needs for food and materials, researchers aim to
 \end{figure}
 
 
-
-An important step in estimating all of the plant phenotypic properties is to obtain $3$D shape and pose for all the plant leaves~\cite{muller2015leaf}, which has to be measured in a limited growth space with minimum disturbance, making it impractical to use scanning lasers for shape modeling. Alternatively we propose to mount close-range time-of-flight RGB-D sensors in the growth chambers, acquire color, IR-reflectance and range data, and estimate leaf shape through building leaf $3$D mesh models (see Fig.~\ref{fig:plantnoise}). Mesh fitting to $3$D point clouds and depth maps enables visualization and leaf shape analysis by providing a surface topology and geometry to a point cloud~\cite{Sienz2000,Yeh2011}.  A mesh can efficiently compress dense scanned data and mesh fitting methods have been developed that adhere to the underlying shape and preserve geometric features such as creases~\cite{hoppe:1994,Kobbelt:1998}. 
+An important step in estimating all of the plant phenotypic properties is to obtain $3$D shape and pose for all the plant leaves~\cite{muller2015leaf}, which has to be measured in a limited growth space with minimum disturbance, making it impractical to use scanning lasers for shape modeling. As an alternative, we propose to mount close-range time-of-flight RGB-D sensors in the growth chambers, acquire color, IR-reflectance and range data, and estimate leaf shape through building leaf $3$D mesh models (see Fig.~\ref{fig:plantnoise}). Mesh fitting to $3$D point clouds and depth maps enables visualization and leaf shape analysis by providing a surface topology and geometry to a point cloud~\cite{Sienz2000,Yeh2011}.  A mesh can efficiently compress dense scanned data and mesh fitting methods have been developed that adhere to the underlying shape and preserve geometric features such as creases~\cite{hoppe:1994,Kobbelt:1998}. 
 %
-However, while time-of-flight RGB-D sensors are small, inexpensive and provide dense $3$D surface sampling of objects, they pose a challenge to surface modeling of small objects due to large depth noise. Specifically, in our leaf $3$D mesh modeling application, the pixel-depth noise is significantly larger than the leaf surface features, and can be on the order of the leaf size (see Fig.~\ref{fig:sigmainterframe}). In this paper, we present a new solution to automatically build precise $3$D mesh models of plant leaves using time-of-flight RGB-D sensors. We achieve the goal by cutting through the depth noise to obtain high fidelity surface models of leaves. Our solution differs from the traditional mesh fitting algorithms because we recover the true leaf surface rather than adhering meshes as closely as possible to the 3D points.
+However, while time-of-flight RGB-D sensors are small, inexpensive and provide dense $3$D surface sampling of objects, they pose a challenge to surface modeling of small objects due to large depth noise. Specifically, in our leaf $3$D mesh modeling application, the pixel-depth noise has a standard deviation on the order of the surface feature sizes (see Fig.~\ref{fig:sigmainterframe}). In this paper, we present a new solution to automatically build precise $3$D mesh models of plant leaves using time-of-flight RGB-D sensors. We achieve this through formulating an optimization that minimizes depth noise and adds a curvature-based regularization.  
+
+There have been differing goals in previous work on automated $3$D leaf modeling.   One goal has been to generate realistic foliage for graphics~\cite{Bradley:2013}.  Here known leaf shapes are fit to $3$D structure from motion data producing realistic-looking foliage, but not necessarily a close approximation to the actual plant leaf shapes and poses.  In~\cite{Quan:2006} an interactive system enables semi-automatic estimation of complex arrangements of leaves.  The leaf shapes are all very similar and are fit by warping a template.  In~\cite{Alenya2011,Alenya2013} plant leaves are automatically segmented and fit using color and time-of-flight data enabling robotic arm inspection.  This work is most similar to ours and they use a similar sensor, but the goals are quite different.  They automatically segment and estimate poses of densely spaced leaves using simple geometric models (planes and parabolas) to fit the 3D data resulting in leaf poses and rough shape approximations.  Our goal, on the other hand, is not segmenting overlapping leaves, but rather to estimate complex $3$D leaf surfaces as precisely as possible from the noisy data.  For this our flexible mesh model fitting approach gives much more accurate results.
 
 
 
@@ -35,10 +32,10 @@ However, while time-of-flight RGB-D sensors are small, inexpensive and provide d
 
 We propose a new mesh generation algorithm that has the following advantages:
 \begin{itemize}
-\item It resolves object shape despite large noise in the range images by leveraging multiple sensor modalities.  
-\item Edge features of the high resolution color image are used to help select and constrain vertices and mesh edges.  
-\item The errors in depth are modeled along camera rays and minimized during fitting to facets.  \item The IR reflectance image is used as a Shape from Shading cue to influence facet surface normals.  
-\item A linear least squares solution to Laplacian smoothing is integrated into the mesh fitting for regularization with surface curvature priors, and modification is made to preserve sharp edges and creases.
+\item It resolves complex $3$D leaf shapes despite large noise in the range images by leveraging multiple sensor modalities.  
+\item Boundary edge features in the high resolution color image are used to help select and constrain vertices and mesh edges.  
+\item The errors in depth are modeled along camera rays and minimized during fitting to facets.  
+\item A regularization term modeling curvature is incorporated and a linear approximation enables a fast, least-squares shape fit.
 \end{itemize}
 
 
