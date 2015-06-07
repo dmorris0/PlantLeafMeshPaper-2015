@@ -34,7 +34,7 @@ Here $\mathcal{F}$ is the set of three vertex indices belonging to the facet, an
 
 \begin{figure}
 \begin{center}
-   \includegraphics[trim=150 140 140 80,clip,width=0.75\linewidth]{Figures/TriangleParameterization}
+   \includegraphics[trim=150 140 140 80,clip,width=0.5\linewidth]{Figures/TriangleParameterization}
 \end{center}
    \caption{The coordinates of a point on a facet described by Eq.~(\ref{eq:point}) are the weighted linear sum of the three vertex coordinates.  The weight, $\alpha_a$, for vertex $\vertex_a$ is given by $\alpha_a = \frac{l_a}{h_a}$, the ratio of its perpendicular distance $l_a$ to the opposite edge to the vertex perpendicular distance $h_a$.  Analogous expressions describe $\alpha_b$ and $\alpha_c$. }
 \label{fig:triangle}
@@ -51,11 +51,11 @@ where $\mathcal{D}$ is the set of depth pixels that project onto the target.  Th
 
 \subsection{Regularization}
 
-Prior models on surface properties can be incorporated into the mesh via regularization and in so doing reduce the impact of noise.  In our application leaf surfaces are generally smoothly curved with few sharp edges.  We propose a regularization that approximates  Since our mesh facets are roughly equal in size, we can use the angle, $\theta$, between adjacent facet normals, $\normal_i$ and $\normal_j$:
+Prior models on surface properties can be incorporated into the mesh via regularization and in so doing reduce the impact of noise.  In our application leaf surfaces are generally smoothly curved with few sharp edges.  We propose a regularization term that penalizes the approximate curvature between pairs of facets.  Since the angle, $\theta$, between adjacent facet normals, $\normal_i$ and $\normal_j$:
 \beq
-E_{reg} = \sum_{adj(i,j)} \cos(\normal_i\cdot\normal_j)^{-1}. \label{eq:reg}
+E_{reg}(\vlambda_v) = w\sum_{adj(i,j)} \| \frac{\cos(\normal_i\cdot\normal_j)^{-1}}{s_a+s_b} \|^2. \label{eq:reg}
 \eeq
-Here the sum is over all pairs of normals whose facets share an edge and hence are adjacent.  Adding this nonlinear regularization term to the opimization can significantly improve surface estimation with strong noise.
+Here the sum is over all pairs of normals whose facets share an edge and hence are adjacent.  The denominator components shown in Fig.~\ref{fig:regularization}($a$) approximates the arc length, $s$ in the formula for curvature $k=\frac{\theta}{s}$, and $w$ is a weight controlling the level of smoothing.  Adding this nonlinear regularization term to the opimization can significantly improve surface estimation with strong noise.
 
 It is also useful to have a linear regularization function.  The reason is that initial depth fitting on the mesh is a fast linear least squares estimate, but if some vertices are insufficiently constrained the matrix inversion suffers from loss of full rank.  This tends to happen when facets are small enough that a number of them have no depth pixels projecting into them.  Adding a linear regularization term between pairs of facets will ensure that the coefficient matrix maintains full rank during least squares.
 
@@ -64,7 +64,7 @@ It is also useful to have a linear regularization function.  The reason is that 
 \begin{tabular}{c}
    \includegraphics[trim=140 110 130 70,clip,width=0.6\linewidth]{Figures/adjacentFacets} \\
    ($a$) \\
-   \includegraphics[trim=140 110 140 60,clip,width=0.7\linewidth]{Figures/adjacentApprox} \\
+   \includegraphics[trim=140 110 140 80,clip,width=0.65\linewidth]{Figures/adjacentApprox} \\
    ($b$) \\
 \end{tabular}
 \end{center}
@@ -75,11 +75,19 @@ It is also useful to have a linear regularization function.  The reason is that 
 We created an alternative linear regularization that uses an approximation to the angle between adjacent facets.  Figure~\ref{fig:regularization}($a$) illustrates that the angle between two adjacent facets is given by $\theta = \theta_a+\theta_d$, the angles subtended by $e_\perp$, the perpendicular distance between lines through opposite vertices of the (non-planar) quadrilateral formed by the two facets.  Instead we use the projection of the quadrilateral in the image, find the intersection of the lines between opposite vertices, and calculate the depth distance along this intersection ray $e_p = \frac{a\lambda_a+d\lambda_d}{a+d} - \frac{b\lambda_b+c\lambda_c}{b+c}$, where $a$, $b$, $c$ and $d$ are image distances along the edges joining the intersection point to the respective vertices.  Finally we use the tangent of the angles in the regularization to obtain:
 \beq
 \begin{array}{rcl}
-E_{linreg} & = & \sum_{adj(i,j)}  \|\tan(\theta'_{ai})\|_2 + \|\tan(\theta'_{di})\|_2 \\
-           & = & \sum_{adj(i,j)} \|\frac{e_p}{a_i}\|_2 + \|\frac{e_p}{d_i}\|_2. \label{eq:linreg} \\
+E_{lin}(\vlambda_v) & = & w_l\sum_{adj(i,j)}  \|\tan(\theta'_{ai})\|^2 + \|\tan(\theta'_{di})\|^2 \\
+           & = & w_l\sum_{adj(i,j)} \|\frac{e_p}{a_i}\|^2 + \|\frac{e_p}{d_i}\|^2. \label{eq:linreg} \\
 \end{array}
 \eeq
-Again the sum is over all pairs of adjacent facets.
+Again the sum is over all pairs of adjacent facets, and $w_l$ is the weighting term.
 
 \subsection{Algorithm}
+
+The algorithm steps are:
+\begin{enumerate}
+\item Filter pixels occluded using Eq.~(\ref{eq:occluded})
+\item Segment and build a planar mesh, see section~\ref{sec:colormesh}
+\item Perform linear least squares for vertex depths, $\vlambda_v$, by minimizing $E_{depth}(\vlambda_{\vertex})+E_{lin}(\vlambda_v)$.
+\item Refine $\vlambda_v$ by minimizing $E_{depth}(\vlambda_{\vertex})+E_{reg}(\vlambda_v)$.
+\end{enumerate}
 
