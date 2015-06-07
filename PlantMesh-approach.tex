@@ -1,14 +1,14 @@
 \section{Sensor Overview}
 \label{sec:overview}
 
-We explore using a new class of RGB-D sensor such as the Creative Senz3D~\cite{nguyen2015vietnamese} to build 3D mesh models of plant leafs. The sensor contains a high resolution color camera ($1280 \times 720$ pixels) adjacent and parallel to a lower resolution depth camera ($320\times240$ pixels).  A flash IR emitter adjacent to these cameras illuminates the scene and depth sensor measures the time-of-travel for the reflected light as well as its reflectance over its pixel grid.  These modalities are illustrated in Figure~\ref{fig:plantnoise}.  Our approach is to leverage of the strengths of each modality to compensate for weaknesses in the other.  
+We explore using a new class of RGB-D sensor such as the Creative Senz3D~\cite{nguyen2015vietnamese} to build 3D mesh models of plant leafs. The sensor contains a high resolution color camera ($1280 \times 720$ pixels) adjacent and parallel to a lower resolution depth camera ($320\times240$ pixels).  A flash IR emitter adjacent to these cameras illuminates the scene and depth sensor measures the time-of-travel for the reflected light as well as its reflectance over its pixel grid.  These modalities are illustrated in Figure~\ref{fig:plantnoise}.  
 
-In order to gain the most from the sensors, we model effects due to sensor alignment and sensor noise.  Pose alignment between the color and depth cameras as well as intrinsic parameters are calibrated using Zhang's method~\cite{Zhang2000}.  This is possible for the depth camera since it also returns an IR reflectance at each pixel, and the checker board can be detected in this.  In the rest of this section the occlusion effects of displaced sensors are modeled and the depth noise is modeled.
+In order to gain the most from the sensors, we model effects due to sensor alignment and sensor noise.  Pose alignment between the color and depth cameras, as well as intrinsic parameters, are calibrated using Zhang's method~\cite{Zhang2000}.  In the rest of this section occlusion effects between sensors and the depth noise are modeled.
 
 
 \subsection{Occlusion Modeling}
 
-The color camera is offset to the side of the depth camera, and so at depth discontinuities, such as leaf boundaries, some pixels visible by the depth camera may be occluded in the color camera.  During mesh fitting these occluded pixels may project into the leaf mesh and result in large depth distortions.  In~\cite{Alenya2011} an interpolated z buffer is used to detect these occluded pixels.  Here we present a visibility analysis method that is closer to the stereo occlusion modeling~\cite{Belhumeur1996}.  We do not require rectification as there is no pixel matching, but we use the known horizontal offset of the color camera from the depth camera.
+The color camera is offset to the side of the depth camera, and so at depth discontinuities, such as leaf boundaries, some pixels visible by the depth camera may be occluded in the color camera.  During mesh fitting these occluded pixels may project into the leaf mesh and result in large depth distortions.  In~\cite{Alenya2011} an interpolated z buffer is used to detect these occluded pixels.  Here we present a visibility analysis method that is closer to the stereo occlusion modeling~\cite{Belhumeur1996}.  We do not require rectification as there is no pixel matching, and we use the known horizontal offset of the color camera from the depth camera.
 
 A row of pixels in the depth camera are projected out into world coordinates, as illustrated in Fig.~\ref{fig:occlusion}.  Then using just the planar position of the color camera (and not its orientation), the angle to the color sensor, $\theta(i)$, can be calculated for each depth pixel $i$.  Starting from the left-most pixel we incrementally step through all the pixels and set $\theta_{\max}(i) = \max(\theta(i),\theta_{\max}(i-1))$.  This keeps track of the largest angle seen so far in the row traversal.  Occluded pixels are then simply:
 \beq
@@ -18,9 +18,9 @@ This assumes occluding objects are wide enough not to be seen around.  Results o
 
 \begin{figure}
 \begin{center}
-   \includegraphics[trim=130 90 140 90,clip,width=0.75\linewidth]{Figures/OcclusionModeling}
+   \includegraphics[trim=130 90 140 90,clip,width=0.65\linewidth]{Figures/OcclusionModeling}
 \end{center}
-   \caption{Occlusion modeling }
+   \caption{Occlusion modeling.  The red dotted lines indicate pixels measured by the depth camera that are not visible to the color camera, as predicted in Eq.(\ref{eq:occluded}). }
 \label{fig:occlusion}
 \end{figure}
 
@@ -28,7 +28,7 @@ This assumes occluding objects are wide enough not to be seen around.  Results o
 \subsection{Noise Characterization}
 \label{sec:noise}
 
-Depth measurements are performed along pixel rays, and hence depth noise is modeled as a one dimensional random variable, $\varepsilon$, along the ray for each pixel along its ray direction.  We observe significant noise correlation between sequential measurements of a given pixel, and so do not assume sequential measurements are independent.  On the other hand averaging multiple measurements reduces the noise.  To capture partial correlation we propose the following simple noise model. 
+Depth measurements are performed along pixel rays, and hence depth noise is modeled as a one dimensional random variable, $\varepsilon$, along each pixel ray direction.  We observe significant noise correlation between sequential measurements of a given pixel, and so do not assume sequential measurements are independent.  On the other hand averaging multiple measurements reduces the noise.  To capture partial correlation we propose the following simple noise model. 
 
 The depth noise, $\varepsilon$, is modeled as the sum of an image-varying term, $\varepsilon_I$, and a scene-varying term, $\varepsilon_S$:
 \begin{equation}
@@ -50,7 +50,7 @@ The total pixel noise can be estimated assuming independence of $\varepsilon_I$ 
 \begin{equation}
 \sigma^2 = \frac{\sigma_I^2}{N} + \sigma_S^2,\label{eq:sigma}
 \end{equation}
-where $N$ is the number of images averaged over.  When averaging 5 or more depth images the scene-varying contribution, $\sigma_S^2$, will dominate.  There are additional sources of noise not modeled by this.  These include object specularities, and mixed-depth pixels on object edges.  These tend to produce very large image-varying noise, $\sigma_I$, and we can filter these points by discarding depth pixels with $\sigma_I>20$mm.  
+where $N$ is the number of images averaged over.  When averaging 5 or more depth images the scene-varying contribution, $\sigma_S^2$, will dominate.  There are additional sources of noise not modeled by this.  These include object specularities, and mixed-depth pixels on object edges.  
 
 
 \begin{figure}
