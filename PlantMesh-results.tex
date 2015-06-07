@@ -17,10 +17,10 @@
 
 \begin{figure}
 \begin{center}
-\includegraphics[trim=120 220 120 220,clip,width=0.8\linewidth]{Figures/plantMeshGT-01}
-\includegraphics[trim=120 220 120 220,clip,width=0.8\linewidth]{Figures/plantMeshGT-02}
+\includegraphics[trim=120 220 120 220,clip,width=0.7\linewidth]{Figures/plantMeshGT-01}
+\includegraphics[trim=120 300 120 300,clip,width=0.7\linewidth]{Figures/plantMeshGT-02}
 \end{center}
-   \caption{ The $3$D reconstruction from Fig.~\ref{fig:plantnoise} is aligned and compared to a laser scan of the plant image.  }
+   \caption{ The $3$D reconstruction from Fig.~\ref{fig:plantnoise} is aligned to a laser scan of the plant image. The laser scan data are shown as smoothly-colored surfaces plotted in the same axes as the mesh.  The two views show good overall agreement including feature curves. Errors are seen near the ends of the left and right leaves.  The lower leaf has likely shifted between the laser scan and the depth data collection.  }
 \label{fig:plantnoiseGT}
 \end{figure}
 
@@ -31,11 +31,14 @@
 ($a$) \\
 \includegraphics[trim=190 280 190 290,clip,width=0.7\linewidth]{Figures/bean3DMesh} \\
 ($b$) \\
-\includegraphics[trim=190 280 190 290,clip,width=0.7\linewidth]{Figures/bean3DIsosurface} \\
-($c$) \\
+\end{tabular}
+\begin{tabular}{cc}
+\includegraphics[trim=190 280 190 290,clip,width=0.49\linewidth]{Figures/bean3DIsosurface} &
+\includegraphics[trim=190 280 190 290,clip,width=0.49\linewidth]{Figures/beanParabolic} \\
+($c$) & ($d$) \\
 \end{tabular}
 \end{center}
-   \caption{ Result of fitting the mesh to the bean data from Fig.~\ref{fig:beanimageprocess}.  ($g$)  The $3$D points are red for those on the mesh and blue for the remaining.  ($h$) A more detailed view of the mesh. ($i$) A comparison with an isosurface created using marching cubes~\cite{} }
+   \caption{ Result of fitting the mesh to the bean data from Fig.~\ref{fig:beanimageprocess}.  ($g$)  The $3$D points are red for those on the mesh and blue for the remaining.  ($h$) A more detailed view of the mesh revealing detailed curves of the leaves. ($c$) A comparison with an isosurface created using marching cubes~\cite{}. ($d$) A comparison with the use of parabolic fits to leaf surfaces as in~\cite{Alenya2011,Alenya2013}.  Clearly parabolic models cannot capture complex leaf structures like these leaves or the leaves in Fig.~\ref{fig:plantnoiseGT}. }
 \label{fig:beanfit}
 \end{figure}
 
