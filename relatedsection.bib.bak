@@ -1,0 +1,85 @@
+@INPROCEEDINGS{ma2008image,
+ author={Wei Ma and Hongbin Zha and Jia Liu and Xiaopeng Zhang and Bo Xiang},
+ booktitle={Pattern Recognition, 2008. ICPR 2008. 19th International Conference on},
+ title={Image-based plant modeling by knowing leaves from their apexes},
+ year={2008},
+ month={Dec},
+ pages={1-4},
+ keywords={botany;feature extraction;image processing;pose estimation;3D generic leaves;apex feature detection;image-based plant modeling;pose information;position information;Computer vision;Content addressable storage;Data mining;Feature extraction;Geometry;Image reconstruction;Image segmentation;Laboratories;Laser modes;Shape},
+ doi={10.1109/ICPR.2008.4761521},
+ ISSN={1051-4651},}
+
+@incollection{Pape2015
+year={2015},
+isbn={978-3-319-16219-5},
+booktitle={Computer Vision - ECCV 2014 Workshops},
+volume={8928},
+series={Lecture Notes in Computer Science},
+editor={Agapito, Lourdes and Bronstein, Michael M. and Rother, Carsten},
+doi={10.1007/978-3-319-16220-1_5},
+title={3-D Histogram-Based Segmentation and Leaf Detection for Rosette Plants},
+url={http://dx.doi.org/10.1007/978-3-319-16220-1_5},
+publisher={Springer International Publishing},
+keywords={3-D Histogram thresholding; Euclidean distance map; Graph analysis; Leaf counting; Leaf segmentation},
+author={Pape, Jean-Michel and Klukas, Christian},
+pages={61-74},
+language={English}
+}
+
+@article{martin2004learning,
+  title={Learning to detect natural image boundaries using local brightness, color, and texture cues},
+  author={Martin, David R and Fowlkes, Charless C and Malik, Jitendra},
+  journal={Pattern Analysis and Machine Intelligence, IEEE Transactions on},
+  volume={26},
+  number={5},
+  pages={530--549},
+  year={2004},
+  publisher={IEEE}
+}
+
+@article{valliammal2012leaf,
+  title={Leaf image segmentation based on the combination of Wavelet Transform and K Means clustering},
+  author={Valliammal, N and Geethalakshmi, SN},
+  journal={International Journal of Advanced Research in Artificial Intelligence},
+  volume={1},
+  number={3},
+  pages={37--43},
+  year={2012},
+  publisher={Citeseer}
+}
+
+@article{mishra2011decoupled,
+  title={Decoupled active contour (DAC) for boundary detection},
+  author={Mishra, Akshaya K and Fieguth, Paul W and Clausi, David A},
+  journal={Pattern Analysis and Machine Intelligence, IEEE Transactions on},
+  volume={33},
+  number={2},
+  pages={310--324},
+  year={2011},
+  publisher={IEEE}
+}
+
+@article{Manh2001139,
+title = "AE—Automation and Emerging Technologies: Weed Leaf Image Segmentation by Deformable Templates ",
+journal = "Journal of Agricultural Engineering Research ",
+volume = "80",
+number = "2",
+pages = "139 - 146",
+year = "2001",
+note = "",
+issn = "0021-8634",
+doi = "http://dx.doi.org/10.1006/jaer.2001.0725",
+url = "http://www.sciencedirect.com/science/article/pii/S0021863401907255",
+author = "A.-G. Manh and G. Rabatel and L. Assemat and M.-J. Aldon"
+}
+
+@article{toshev2012shape,
+  title={Shape-based object detection via boundary structure segmentation},
+  author={Toshev, Alexander and Taskar, Ben and Daniilidis, Kostas},
+  journal={International journal of computer vision},
+  volume={99},
+  number={2},
+  pages={123--146},
+  year={2012},
+  publisher={Springer}
+}
